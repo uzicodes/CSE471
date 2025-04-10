@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 import {
@@ -46,12 +46,9 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-export default function EditUserPage({
-  params,
-}: {
-  params: { userId: string };
-}) {
-  const { userId } = params;
+export default function EditUserPage() {
+  const params = useParams();
+  const  userId = params.userId;
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 

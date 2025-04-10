@@ -205,7 +205,7 @@ export default function EditProfilePage() {
         </div>
 
         <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
-          {uploadingImage ? "Uploading..." : "Change Picture"}
+          {uploadingImage ? "Uploading..." : "Change Profile Picture"}
           <input
             type="file"
             className="hidden"

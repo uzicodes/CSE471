@@ -39,7 +39,7 @@ export const POST = async (request: Request) => {
     const newUser = new User({
       firstName,
       lastName,
-      normalizedemail,
+      email:normalizedemail,
       passwordHash,
       contactNumber,
       emailOtp,

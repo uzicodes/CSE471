@@ -44,11 +44,9 @@ export async function GET(req: NextRequest, context: any) {
 }
 
 // PATCH - Update a user
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function PATCH(req: NextRequest, context: any) {
   try {
+    const userId = context.params.userId;
     // Check admin authorization
     if (!(await isAdmin())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -56,7 +54,6 @@ export async function PATCH(
 
     await dbConnect();
 
-    const { userId } = params;
     const body = await req.json();
 
     // Validate userId
@@ -96,19 +93,15 @@ export async function PATCH(
 }
 
 // DELETE - Remove a user
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function DELETE(req: NextRequest, context: any) {
   try {
+    const userId = context.params.userId;
     // Check admin authorization
     if (!(await isAdmin())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     await dbConnect();
-
-    const { userId } = params;
 
     // Validate userId
     if (!mongoose.Types.ObjectId.isValid(userId)) {

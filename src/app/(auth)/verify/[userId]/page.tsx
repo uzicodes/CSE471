@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Mail, ArrowRight } from "lucide-react";
 
-export default function Verify({ params }: { params: { userId: string } }) {
+export default function Verify() {
+  const params = useParams();
   const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();

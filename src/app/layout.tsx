@@ -40,7 +40,7 @@ export default function RootLayout({
             <SonnerToaster position="top-center" />
 
             <Navbar></Navbar>
-            <div className="mt-16">{children}</div>
+            <div className="mt-16 p-8">{children}</div>
           </AuthProvider>
         </ThemeProvider>
       </body>

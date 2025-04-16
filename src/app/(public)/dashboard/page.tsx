@@ -67,8 +67,14 @@ export default function DashboardGreeting() {
                 Browse Menu
               </Link>
               <Link
-                href="/orders"
+                href="/cart"
                 className="bg-orange-700 text-white hover:bg-orange-800 transition-colors px-6 py-3 rounded-md font-medium text-lg"
+              >
+                View Cart
+              </Link>
+              <Link
+                href="/orders"
+                className="bg-red-700 text-white hover:bg-red-800 transition-colors px-6 py-3 rounded-md font-medium text-lg"
               >
                 View Orders
               </Link>

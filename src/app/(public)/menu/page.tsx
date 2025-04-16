@@ -1,11 +1,11 @@
 import React, { Suspense } from 'react';
-import ProductCatalogPage from './MenuComponent';
+import MenuComponent from './MenuComponent';
 
 const page = () => {
     return (
         <div>
             <Suspense>
-<ProductCatalogPage></ProductCatalogPage>
+<MenuComponent></MenuComponent>
             </Suspense>
         </div>
     );

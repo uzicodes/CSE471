@@ -44,6 +44,13 @@ export default function AdminDashboard() {
       title: "Products Management",
       description: "Add, edit, and organize your product catalog",
     },
+    {
+      href: "/admin/orders",
+      icon: <Package size={24} />,
+      title: "Orders Management",
+      description: "View and manage customer orders and transactions",
+    },
+   
     // You can add more items here later
   ];
 

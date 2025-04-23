@@ -1,11 +1,10 @@
-
-// /app/cart/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface CartItem {
   _id: string;
@@ -20,6 +19,7 @@ export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { data: session } = useSession();
 
   // Load cart items from localStorage
   useEffect(() => {
@@ -77,11 +77,13 @@ export default function CartPage() {
 
   // Proceed to checkout
   const checkout = () => {
-    alert(
-      "This would normally redirect to checkout. For this demo, we'll just clear the cart."
-    );
-    setCartItems([]);
-    router.push("/checkout-success");
+    if (!session) {
+      // If user is not logged in, redirect to login page
+      router.push("/auth/sign-in?redirect=/checkout");
+      return;
+    }
+    // If user is logged in, proceed to checkout
+    router.push("/checkout");
   };
 
   if (isLoading) {
@@ -231,7 +233,7 @@ export default function CartPage() {
               </div>
               <div className="border-t pt-2 mt-2 flex justify-between font-bold">
                 <span>Total</span>
-                <span>৳{(totalPrice + 5).toFixed(2)}</span>
+                <span>৳{(totalPrice + 45).toFixed(2)}</span>
               </div>
               <button
                 onClick={checkout}

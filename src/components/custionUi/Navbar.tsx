@@ -140,6 +140,12 @@ export default function Navbar() {
                     <span>Edit Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/orders" className="flex w-full items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Oders</span>
+                  </Link>
+                </DropdownMenuItem>
 
                 {/* Admin access */}
                 {session.user.role === "admin" && (

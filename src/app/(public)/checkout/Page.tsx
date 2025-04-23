@@ -22,6 +22,7 @@ interface ShippingAddress {
   details?: string;
 }
 
+
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
   const router = useRouter();

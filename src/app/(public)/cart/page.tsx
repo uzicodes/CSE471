@@ -221,6 +221,8 @@ export default function CartPage() {
               Clear Cart
             </button>
 
+
+
             <div className="bg-gray-100 p-6 rounded-lg w-full md:w-96">
               <h2 className="text-lg font-bold mb-4">Order Summary</h2>
               <div className="flex justify-between mb-2">

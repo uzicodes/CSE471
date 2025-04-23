@@ -9,9 +9,10 @@ import connectDB from "@/lib/dbConnect";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
   try {
+    const params = context.params
     // Check if user is authenticated and is an admin
     const session = await getServerSession(authOptions);
 

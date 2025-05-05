@@ -19,8 +19,7 @@ export default function PaymentPage() {
   const [mobileNumber, setMobileNumber] = useState('+880');
   const [cardNumber, setCardNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');  // This will be retrieved from localStorage
-  const [customerAddress, setCustomerAddress] = useState(''); // New state for address
+  const [customerEmail, setCustomerEmail] = useState('');
   const [couponCode, setCouponCode] = useState(''); // State for coupon code
   const [couponDiscount, setCouponDiscount] = useState(0); // State for coupon discount
   const router = useRouter();
@@ -37,7 +36,6 @@ export default function PaymentPage() {
       setCustomerName(parsedData.name);  // Set customer name from CheckoutPage form
       setCustomerEmail(parsedData.email); // Set customer email from CheckoutPage form
       setMobileNumber(parsedData.phone); // Set customer phone number from CheckoutPage form
-      setCustomerAddress(parsedData.address); // Set customer address from CheckoutPage form
     }
   }, []);
 
@@ -46,7 +44,9 @@ export default function PaymentPage() {
     0
   );
 
+  // Dynamically set delivery fee based on delivery method
   const deliveryFee = deliveryMethod === 'Priority' ? 60 : 45;
+
   const totalBeforeCoupon = subtotal + deliveryFee + tip;
   const total = totalBeforeCoupon - couponDiscount;  // Apply coupon discount to total
 
@@ -58,58 +58,61 @@ export default function PaymentPage() {
       return;
     }
 
-    // Handle coupon discount logic
-    let finalCouponDiscount = couponDiscount;
+    if (paymentMethod === 'Bkash' || paymentMethod === 'Nagad') {
+      if (!/^(\+880)(\d{10})$/.test(mobileNumber)) {
+        alert(`Please enter a valid ${paymentMethod} number starting with +880 followed by 10 digits.`);
+        return;
+      }
+    }
 
-    if (couponCode === 'BITE10') {
-      finalCouponDiscount = subtotal * 0.10; // Apply 10% discount
-      alert('Coupon applied successfully!');
-    } else {
-      finalCouponDiscount = 0;
-      alert('Invalid coupon!');
+    if (paymentMethod === 'Card/Debit Card') {
+      const cardDigits = cardNumber.replace(/\s/g, '');
+      if (!/^\d{16}$/.test(cardDigits)) {
+        alert('Please enter a valid 16-digit card number.');
+        return;
+      }
     }
 
     // Collect order data to send to the backend API
     const orderData = {
-      customerName,
-      customerEmail,
+      customerName,  // Use the customer name from localStorage
+      customerEmail, // Use the customer email from CheckoutPage form
       customerPhone: mobileNumber,
-      customerAddress,
-      orderItems: cartItems,
+      orderItems: cartItems,  // Ensure cartItems is populated
       deliveryMethod,
       paymentMethod,
       tip,
-      subtotal,
-      couponCode,
-      total: totalBeforeCoupon - finalCouponDiscount, // Apply discount to total
-      couponDiscount: finalCouponDiscount,  // Store coupon discount value here
+      subtotal,  // Sending correct subtotal from PaymentPage
+      couponCode,  // Send the coupon code as well
+      total,      // Send the total amount calculated in PaymentPage
     };
 
-    // Save the order data including the coupon discount
-    localStorage.setItem('orderData', JSON.stringify(orderData));
-
     try {
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      // Send order data to Next.js API route (/api/orders)
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(orderData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to confirm order');
+        throw new Error(errorData.message || "Failed to confirm order");
       }
 
-      // Redirect to success page after order confirmation
+      // Redirect to order success page after successful order submission
+      localStorage.removeItem('cart');  // Clear the cart after order
       router.push('/payment/success');  // Redirect to the success page
 
     } catch (error: any) {
-      alert(`Error: ${error.message || 'An unexpected error occurred'}`);
-      console.error('Error confirming order:', error);
+      alert(`Error: ${error.message || "An unexpected error occurred"}`);
+      console.error("Error confirming order:", error);
     }
   };
 
-  // Function to format card number input (group digits in blocks of 4)
+  // Function to format card number input
   const formatCardInput = (value: string) => {
     return value
       .replace(/\D/g, '')  // Remove all non-numeric characters
@@ -129,11 +132,13 @@ export default function PaymentPage() {
     setMobileNumber(input.slice(0, 14));  // Ensure it doesn't exceed 14 digits
   };
 
+  const backgroundImageUrl = "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1920&q=80";
+
   return (
     <div
       className="relative min-h-screen bg-cover bg-center flex items-center justify-center p-6"
       style={{
-        backgroundImage: `url(https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1920&q=80)`,
+        backgroundImage: `url(${backgroundImageUrl})`,
         backgroundPosition: 'center',
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
@@ -201,7 +206,7 @@ export default function PaymentPage() {
             <input
               type="text"
               value={mobileNumber}
-              onChange={(e) => setMobileNumber(e.target.value)}
+              onChange={handleMobileNumberChange}
               placeholder={`Enter your ${paymentMethod} number (+880XXXXXXXXXX)`}
               className="w-full border-2 border-black p-2 rounded"
             />
@@ -270,16 +275,31 @@ export default function PaymentPage() {
           />
           <button
             type="button"
-            onClick={() => {
-              // Add coupon validation or discount logic here
-              if (couponCode === 'BITE10') {
-                setCouponDiscount(subtotal * 0.10);  // Apply 10% discount
-                alert('Coupon applied successfully!');
-              } else {
+            onClick={async () => {
+              if (!couponCode || !customerEmail) {
+                alert("Please enter a coupon code and make sure your email is available.");
+                return;
+              }
+            
+              try {
+                const response = await fetch(`/api/vouchers/validate_voucher?code=${couponCode}&email=${customerEmail}`);
+                const data = await response.json();
+            
+                if (!response.ok) {
+                  setCouponDiscount(0);
+                  alert(data.message || "Invalid or unauthorized coupon.");
+                  return;
+                }
+            
+                setCouponDiscount((subtotal * data.discountAmount) / 100);
+                alert("Coupon applied successfully!");
+              } catch (error) {
+                console.error("Error validating coupon:", error);
                 setCouponDiscount(0);
-                alert('Invalid coupon!');
+                alert("Failed to validate coupon. Please try again.");
               }
             }}
+            
             className="mt-2 bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
           >
             Apply Coupon

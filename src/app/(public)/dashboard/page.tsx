@@ -8,7 +8,7 @@ import Chatbot from '../../../components/chatbot'; // Correct import path
 
 export default function DashboardGreeting() {
   const { data: session, status } = useSession();
-  const [chatbotVisible, setChatbotVisible] = useState(false); // State to control visibility of the chatbot
+  const [chatbotVisible, setChatbotVisible] = useState(false); 
 
   if (status === "loading") {
     return (
